@@ -50,4 +50,4 @@ def clear_outputs():
     return 'Outputs folder cleared successfully!'
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)
