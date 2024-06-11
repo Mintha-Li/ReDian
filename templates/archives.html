@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>归档</title>
+    <!-- 引入Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css" rel="stylesheet">
+     <!-- 引入FontAwesome图标 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <style>
+        /* 自定义样式 */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2 {
+            text-align: center;
+            color: #343a40;
+            margin-bottom: 20px;
+        }
+        .tree {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        .tree > li {
+            margin-bottom: 10px;
+        }
+        .tree > li > span {
+            font-weight: bold;
+            cursor: pointer;
+            color: #007bff;
+            display: inline-block;
+            width: 100%;
+        }
+        .tree > li > ul {
+            margin-top: 5px;
+            padding-left: 20px;
+            border-left: 1px dashed #ccc;
+        }
+        .file-item {
+            margin-left: 10px;
+            list-style: none;
+        }
+        .file-item label {
+            display: block;
+        }
+        .file-item input[type="checkbox"] {
+            margin-right: 5px;
+        }
+        .folder-icon::before {
+            content: "\f07b"; /* 使用FontAwesome图标 */
+            font-family: "Font Awesome 5 Free";
+            margin-right: 5px;
+        }
+        .file-icon::before {
+            content: "\f15b"; /* 使用FontAwesome图标 */
+            font-family: "Font Awesome 5 Free";
+            margin-right: 5px;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            color: #fff;
+            border: none;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        .btn-info {
+            background-color: #17a2b8;
+            border: none;
+        }
+        .btn-info:hover {
+            background-color: #138496;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>档案文件夹内容</h1>
+        <form action="/download_archive" method="post">
+            <ul class="tree">
+                {% for folder, files in subfolders_with_files.items() %}
+                    <li>
+                        <span class="caret folder-icon" data-bs-toggle="collapse" data-bs-target="#folder{{ loop.index }}">{{ folder }}</span>
+                        <ul id="folder{{ loop.index }}" class="collapse">
+                            {% if files %}
+                                {% for file in files %}
+                                <li class="file-item">
+                                    <label>
+                                        <input type="checkbox" name="file" value="{{ folder }}/{{ file }}"> 
+                                        <span class="file-icon"></span>{{ file }}
+                                    </label>
+                                </li>
+                                {% endfor %}
+                            {% else %}
+                                <li class="file-item">该文件夹中没有文件</li>
+                            {% endif %}
+                        </ul>
+                    </li>
+                {% endfor %}
+            </ul>
+            <button type="submit" class="btn btn-primary mt-3">下载选定的文件为ZIP</button>
+        </form>
+        <!-- 添加跳转按钮 -->
+        <div class="text-center mt-3">
+            <a href="/" class="btn btn-info">返回首页</a>
+        </div>
+    </div>
+    <!-- 引入Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- 初始化折叠组件 -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var collapseElements = document.querySelectorAll('[data-bs-toggle="collapse"]');
+            collapseElements.forEach(function(element) {
+                new bootstrap.Collapse(element);
+            });
+        });
+    </script>
+</body>
+</html>

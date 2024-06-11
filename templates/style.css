@@ -1,0 +1,47 @@
+/* 自定义样式 */
+.tree {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.tree > li {
+    margin-bottom: 10px;
+}
+
+.tree > li > span {
+    font-weight: bold;
+    cursor: pointer;
+    color: #007bff;
+}
+
+.tree > li > ul {
+    margin-top: 5px;
+    padding-left: 20px;
+    border-left: 1px dashed #ccc;
+}
+
+.file-item {
+    margin-left: 10px;
+    list-style: none;
+}
+
+.file-item label {
+    display: block;
+}
+
+.file-item input[type="checkbox"] {
+    margin-right: 5px;
+}
+
+.folder-icon::before {
+    content: "\f07b"; /* 使用FontAwesome图标 */
+    font-family: "Font Awesome 5 Free";
+    margin-right: 5px;
+}
+
+.file-icon::before {
+    content: "\f15b"; /* 使用FontAwesome图标 */
+    font-family: "Font Awesome 5 Free";
+    margin-right: 5px;
+}
