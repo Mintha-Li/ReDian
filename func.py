@@ -138,7 +138,6 @@ def process_files_in_folder(folder_path, output_folder, platforms=['微博', '�
         if file_name.endswith('.xlsx'):
             # 提取每个平台的排名数据
             top_combined = extract_top_rankings(file_path, source_column, rank_column, num_ranks, platforms=platforms)
-            print(top_combined)
 
             date_str = file_name.split('-')[0]  # 假设文件名格式为 '2024060318-描述'
             date_obj = datetime.strptime(date_str, "%Y%m%d%H")
@@ -174,7 +173,7 @@ def process_files_in_folder(folder_path, output_folder, platforms=['微博', '�
     last_file_name = os.path.splitext(file_names[-1].split('-')[0])[0]
 
     # 构建输出文件路径
-    output_file_name = f"{current_time}_{first_file_name}_to_{last_file_name}_热点.xlsx"
+    output_file_name = f"{first_file_name}_to_{last_file_name}_热点_{current_time}.xlsx"
     output_file_path = os.path.join(output_folder, output_file_name)
 
     # 保存工作簿到输出文件路径
@@ -183,7 +182,7 @@ def process_files_in_folder(folder_path, output_folder, platforms=['微博', '�
 
 
 if __name__ == '__main__':
-    process_files_in_folder(folder_path='./input',
-                            output_folder='./output',
+    process_files_in_folder(folder_path='./inputs',
+                            output_folder='./outputs',
                             platforms=['微博', '知乎', '抖音'],
                             num_ranks=3)
