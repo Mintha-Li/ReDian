@@ -41,9 +41,9 @@ def convert_to_wan_format(hot_num, source):
         # 移除“ 万热度”并保留“xx万”部分
         if ' 万热度' in hot_num:
             return hot_num.replace(' 万热度', '万')
-    elif isinstance(hot_num, (int, float)):
+    elif isinstance(hot_num, (int, float,str)):
         # 将微博和抖音的热度值转换为“xx万”格式
-        return f"{hot_num / 10000:.0f}万" if hot_num >= 10000 else f"{hot_num}"
+        return f"{int(hot_num) / 10000:.0f}万" if int(hot_num) >= 10000 else f"{int(hot_num)}"
     return hot_num
 
 
@@ -63,14 +63,20 @@ def extract_top_rankings(input_file, source_column, rank_column, rank_num=3, pla
     """
 
     # 读取Excel文件
-    df = pd.read_excel(input_file)
+    df = pd.read_csv(input_file)
 
     # 初始化空的数据框，用于存储结果
     top = pd.DataFrame()
 
     # 遍历每个平台，提取前rank_num条数据
     for platform in platforms:
-        platform_data = df[df[source_column] == platform].nsmallest(rank_num, rank_column)
+        if platform == '微博':
+            platform_data = df[df[source_column] == platform].nsmallest(rank_num+1, rank_column)
+            platform_data.drop(0, axis=0, inplace=True)
+            print(platform_data)
+        else:
+            platform_data = df[df[source_column] == platform].nsmallest(rank_num, rank_column)
+
         top = pd.concat([top, platform_data])
 
     # 重置索引
@@ -135,12 +141,12 @@ def process_files_in_folder(folder_path, output_folder, platforms=['微博', '�
         file_path = os.path.join(folder_path, file_name)
 
         # 检查文件是否为 Excel 文件
-        if file_name.endswith('.xlsx'):
+        if file_name.endswith('.csv'):
             # 提取每个平台的排名数据
             top_combined = extract_top_rankings(file_path, source_column, rank_column, num_ranks, platforms=platforms)
 
-            date_str = file_name.split('-')[0]  # 假设文件名格式为 '2024060318-描述'
-            date_obj = datetime.strptime(date_str, "%Y%m%d%H")
+            date_str = file_name.split('_')[2]  # 假设文件名格式为 '2024060318-描述'
+            date_obj = datetime.strptime(date_str, "%Y%m%d")
             date_display = f"{chinese_weekday_date_display(date_obj)}"
 
             #   计算当前行索引
@@ -169,8 +175,8 @@ def process_files_in_folder(folder_path, output_folder, platforms=['微博', '�
     current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
 
     # 获取文件夹中的第一个文件名和最后一个文件名（去掉扩展名）
-    first_file_name = os.path.splitext(file_names[0].split('-')[0])[0]
-    last_file_name = os.path.splitext(file_names[-1].split('-')[0])[0]
+    first_file_name = os.path.splitext(file_names[0].split('_')[2])[0]
+    last_file_name = os.path.splitext(file_names[-1].split('_')[2])[0]
 
     # 构建输出文件路径
     output_file_name = f"{first_file_name}_to_{last_file_name}_热点_{current_time}.xlsx"
