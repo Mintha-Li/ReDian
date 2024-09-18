@@ -73,7 +73,6 @@ def extract_top_rankings(input_file, source_column, rank_column, rank_num=3, pla
         if platform == '微博':
             platform_data = df[df[source_column] == platform].nsmallest(rank_num+1, rank_column)
             platform_data.drop(0, axis=0, inplace=True)
-            print(platform_data)
         else:
             platform_data = df[df[source_column] == platform].nsmallest(rank_num, rank_column)
 
