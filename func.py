@@ -185,6 +185,100 @@ def process_files_in_folder(folder_path, output_folder, platforms=['微博', '�
     wb.save(output_file_path)
     return output_file_name
 
+def process_files(file_names, output_folder, platforms=['微博', '知乎', '抖音'], num_ranks=3,
+                            source_column='source', rank_column='rank'):
+    """
+    处理目标文件夹中的所有Excel文件,提取指定平台的排名数据并保存到新的Excel文件中。
+
+    参数:
+    file_names(list(str)): 需要处理的文件列表。
+    output_folder (str): 输出文件夹路径,用于保存处理后的Excel文件。
+    platforms (list): 要处理的平台列表,默认包含['微博', '知乎', '抖音']。
+    num_ranks (int): 每个平台提取的前几名数据,默认是3。
+    source_column (str): 平台列的列名,默认是'source'。
+    rank_column (str): 排名列的列名,默认是'rank'。
+    """
+
+    # 确保文件夹中有文件
+    if not file_names:
+        print("文件夹中没有文件。")
+        return
+
+    # 创建新的Excel工作簿和工作表
+    wb = Workbook()
+    ws = wb.active
+
+    # 表头信息初始化
+    header = ['平台']
+    for platform in platforms:
+        header.extend([platform] * num_ranks)
+
+    # 添加表头信息
+    for idx, value in enumerate(header, start=2):
+        ws.cell(row=1, column=idx, value=value)
+
+    # 在第二行第一列写入'排名''
+    ws.cell(row=2, column=2, value='排名')
+
+    # 添加排名信息
+    for col_idx in range(3, ws.max_column + 1, num_ranks):
+        for i in range(1, num_ranks + 1):
+            ws.cell(row=2, column=col_idx + i - 1, value=i)
+
+    # 合并单元格，设置平台名称
+    for col_idx in range(3, ws.max_column + 1, num_ranks):
+        ws.merge_cells(start_row=1, start_column=col_idx, end_row=1, end_column=col_idx + num_ranks - 1)
+
+    # 遍历文件夹中的每个文件
+    for file_index, file_name in enumerate(file_names):
+        # 构建文件的完整路径
+        file_path = file_name
+
+        # 检查文件是否为 Excel 文件
+        if file_name.endswith('.csv'):
+            # 提取每个平台的排名数据
+            top_combined = extract_top_rankings(file_path, source_column, rank_column, num_ranks, platforms=platforms)
+
+            date_str = file_name.split('_')[2]  # 假设文件名格式为 '2024060318-描述'
+            date_obj = datetime.strptime(date_str, "%Y%m%d")
+            date_display = f"{chinese_weekday_date_display(date_obj)}"
+
+            #   计算当前行索引
+            current_row = 3 + file_index * 3
+
+            # 写入时间信息并合并单元格
+            ws.cell(row=current_row, column=1, value=date_display)
+            ws.merge_cells(start_row=current_row, start_column=1, end_row=current_row + 2, end_column=1)
+
+            # 写入热搜标题
+            ws.cell(row=current_row, column=2, value='标题')
+            for col_index, title in enumerate(top_combined['title'], start=3):
+                ws.cell(row=current_row, column=col_index, value=title)
+
+            # 写入热度
+            ws.cell(row=current_row + 1, column=2, value='热度')
+            for col_index, hot_num in enumerate(top_combined['hot_num'], start=3):
+                ws.cell(row=current_row + 1, column=col_index, value=hot_num)
+
+            # 写入类型（空）
+            ws.cell(row=current_row + 2, column=2, value='类型')
+            for col_index in range(3, ws.max_column + 1):
+                ws.cell(row=current_row + 2, column=col_index, value='')
+
+    # 获取当前时间并格式化为字符串，作为文件名的一部分
+    current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+    # 获取文件夹中的第一个文件名和最后一个文件名（去掉扩展名）
+    first_file_name = os.path.splitext(file_names[0].split('_')[2])[0]
+    last_file_name = os.path.splitext(file_names[-1].split('_')[2])[0]
+
+    # 构建输出文件路径
+    output_file_name = f"{first_file_name}_to_{last_file_name}_热点_{current_time}.xlsx"
+    output_file_path = os.path.join(output_folder, output_file_name)
+
+    # 保存工作簿到输出文件路径
+    wb.save(output_file_path)
+    return output_file_name
 
 if __name__ == '__main__':
     process_files_in_folder(folder_path='./inputs',

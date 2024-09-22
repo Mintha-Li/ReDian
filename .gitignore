@@ -155,6 +155,7 @@ cython_debug/
 data/
 inputs/
 outputs/
+output/
 archives/
 hot_searches_for_apps/
 hot_to_xlsx.py
